@@ -19,4 +19,4 @@ g(x) = x^2/10; setColor -> rgba(251,146,60,0.9);
 | Server address | — |
 
 The preview exports **PNG, JPEG, WEBP, SVG and PDF**. "📡 Server" pushes your code to the Klax Android app
-(`http://127.0.0.1:8080` by default). Full language reference: `docs/LANGUAGE.md` in the repository.
+(`http://127.0.0.1:8080` by default). Full language reference: `doc/LANGUAGE.md` in the repository.

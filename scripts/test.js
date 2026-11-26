@@ -74,6 +74,13 @@ t('polar and parametric curves', () => {
 t('every bundled example renders without errors', () => {
   for (const f of fs.readdirSync(path.join(__dirname, '../examples'))) ok(K.render(fs.readFileSync(path.join(__dirname, '../examples', f), 'utf8')));
 });
+t('every ```math recipe in doc/ renders without errors', () => {
+  const dir = path.join(__dirname, '../doc'); let count = 0;
+  for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.md'))) {
+    for (const m of fs.readFileSync(path.join(dir, f), 'utf8').matchAll(/```math\n([\s\S]*?)```/g)) { ok(K.render(m[1])); count++; }
+  }
+  assert.ok(count >= 10, 'recipes found');
+});
 t('PDF wrapper is well formed', () => {
   const pdf = K.makePdf(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), 100, 50);
   const s = Buffer.from(pdf).toString('latin1'); assert.ok(s.startsWith('%PDF-1.4') && s.trim().endsWith('%%EOF'));

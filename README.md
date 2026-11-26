@@ -17,7 +17,7 @@ Klax is three pieces that share one language core (`core/klax.js`):
 | `plugin/` | **Acode plugin** — syntax highlighting, live preview, export, send-to-server |
 | `app/` | **Android app (APK)** — editor, preview, export panel, and an **HTTP server on a port** |
 | `examples/` | sample `.math` files |
-| `docs/LANGUAGE.md` | language reference |
+| `doc/` | full documentation (start with [doc/README.md](doc/README.md)) |
 
 ## Getting the APK and the plugin (GitHub Actions)
 Push to GitHub → **Actions → Build Klax** produces two artifacts:
