@@ -1,6 +1,6 @@
 # Klax
 
-Write maths in a text file, get an image.
+Write maths in a text file, get an image — entirely inside **Acode**.
 
 ```
 SIZE: {1200px, 1300px};
@@ -9,53 +9,35 @@ f(x) = sin(x) * x / 2; setColor -> #38bdf8;
 g(x) = x^2 / 10 - 4;   setColor -> rgba(251, 146, 60, 0.95);
 ```
 
-Klax is three pieces that share one language core (`core/klax.js`):
+Klax is an Acode plugin: open a `.math` file, press the play button, see the graph, save it as an image.
 
 | Folder | What |
 |---|---|
 | `core/` | `.math` parser, expression engine, SVG renderer, PNG/JPEG/WEBP/PDF export |
-| `plugin/` | **Acode plugin** — syntax highlighting, live preview, export, send-to-server |
-| `app/` | **Android app (APK)** — editor, preview, export panel, and an **HTTP server on a port** |
-| `examples/` | sample `.math` files |
-| `doc/` | full documentation (start with [doc/README.md](doc/README.md)) |
+| `plugin/` | the Acode plugin |
+| `examples/` | sample `.math` files (also bundled in the plugin) |
+| `doc/` | full documentation, start with [doc/README.md](doc/README.md) |
 
-## Getting the APK and the plugin (GitHub Actions)
-Push to GitHub → **Actions → Build Klax** produces two artifacts:
-* `klax-apk` → `klax.apk` (install on Android; allow "install unknown apps")
-* `klax-math-acode-plugin` → `klax-math-plugin.zip`
+## Install
+Every push to `main` publishes a GitHub Release with `klax-math-plugin.zip`.
+Download it, then in Acode: **Settings, Plugins, install from file** and choose the zip.
 
-**Every push to `main` automatically publishes a GitHub Release** (`v1.0.<run number>`) with `klax.apk` and `klax-math-plugin.zip` attached,
-and the app's `versionCode` increases with each build. Pushing a tag `vX.Y.Z` publishes a release under that tag instead.
-The APK is signed with a throw-away key unless you add the secrets `KLAX_KEYSTORE_BASE64`, `KLAX_KEYSTORE_PASSWORD`, `KLAX_KEY_ALIAS`, `KLAX_KEY_PASSWORD`
-(a persistent key is needed to update the app in place).
+## Use
+Open or create a `*.math` file. A floating button bar appears:
 
-## Install the Acode plugin
-Acode → **Settings → Plugins → ⋮ / “Install from file”** (or open the zip) → pick `klax-math-plugin.zip`.
-Open or create a `*.math` file, then open the command palette and type **Klax**:
-`Preview graph` (Ctrl-Alt-P), `Send to Klax server` (Ctrl-Alt-S), `Export as PNG / SVG`, `New .math file`, `Server address`.
-The preview has export buttons (PNG, JPEG, WEBP, SVG, PDF), a 🎛 panel (grid / axes / numbers / legend / title, transparent or custom background) and **📡 Server**.
-While the preview is open every edit is pushed live to the Klax app.
-
-## The Klax server
-Opening the app starts a foreground service with an HTTP server (default **port 8080**, falls back to the next free port).
-Change the port, or allow other devices on your Wi-Fi, from ⚙ in the app (LAN is **off** by default; the API has no password).
-
-| Request | Description |
+| Button | Does |
 |---|---|
-| `GET /` | the web UI (the app shows it; a browser on your LAN can too when LAN is on) |
-| `PUT /api/source` | send `.math` code as the body — the app updates instantly |
-| `GET /api/source` | current code |
-| `GET /api/info` · `GET /api/version` | server info / change counter |
-| `GET /render.svg` · `GET /render.png` | image of the current code (rendered by the app UI; keep the app open) |
+| Play | live preview of the graph |
+| Download | opens the export panel (format, scale, background, grid, axes...) |
+| Code | inserts a snippet at the cursor |
 
-```sh
-curl -X PUT --data-binary @examples/demo.math http://127.0.0.1:8080/api/source
-curl -o out.png http://127.0.0.1:8080/render.png
-```
+Everything is also in the command palette (type "Klax") and on shortcuts:
+`Ctrl-Alt-P` run, `Ctrl-Alt-E` export, `Ctrl-Alt-S` save PNG now, `Ctrl-Alt-I` insert snippet, `Ctrl-Alt-N` new file.
+
+Export formats: **PNG, JPEG, WEBP, SVG, PDF**, with or without grid/axes/numbers/legend/title, transparent or custom background.
 
 ## Develop
 ```sh
-node scripts/test.js          # language tests
-node scripts/build-plugin.js  # → dist/klax-math-plugin.zip
-gradle :app:assembleRelease   # needs the Android SDK (CI does it for you)
+node scripts/test.js           # tests (language, docs recipes, plugin bundle)
+node scripts/build-plugin.js   # builds dist/klax-math-plugin.zip
 ```

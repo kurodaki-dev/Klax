@@ -9,14 +9,23 @@ f(x) = sin(x); setColor -> #38bdf8;
 g(x) = x^2/10; setColor -> rgba(251,146,60,0.9);
 ```
 
-## Commands (open the Acode command palette and type "Klax")
+## Buttons
+When a `.math` file is open, three floating buttons appear: **Play** (live preview), **Download** (export panel), **Code** (insert snippet).
+The preview toolbar has fit / real size, copy SVG code and the **Export** panel.
+
+## Commands and shortcuts (command palette: type "Klax")
 | Command | Shortcut |
 |---|---|
-| Preview graph (live) | Ctrl-Alt-P |
-| Send to Klax server | Ctrl-Alt-S |
-| Export PNG / SVG | — |
-| New .math file | — |
-| Server address | — |
+| Run (preview graph) | Ctrl-Alt-P |
+| Export image | Ctrl-Alt-E |
+| Save PNG now | Ctrl-Alt-S |
+| Save SVG now | - |
+| Copy SVG code | - |
+| Insert snippet | Ctrl-Alt-I |
+| New .math file (blank or from an example) | Ctrl-Alt-N |
 
-The preview exports **PNG, JPEG, WEBP, SVG and PDF**. "📡 Server" pushes your code to the Klax Android app
-(`http://127.0.0.1:8080` by default). Full language reference: `doc/LANGUAGE.md` in the repository.
+## Export
+PNG, JPEG, WEBP, SVG, PDF. Scale 0.5x to 4x. Background as in the file, transparent, or any colour with opacity.
+Grid lines, axes, numbers, legend and title can each be left out.
+
+Full documentation: the `doc/` folder of the repository.

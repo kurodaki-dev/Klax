@@ -81,6 +81,23 @@ t('every ```math recipe in doc/ renders without errors', () => {
   }
   assert.ok(count >= 10, 'recipes found');
 });
+t('the plugin bundle builds, contains the examples and no emoji anywhere in the repo', () => {
+  const cp = require('child_process');
+  cp.execFileSync('node', [path.join(__dirname, 'build-plugin.js')], { stdio: 'pipe' });
+  const bundle = fs.readFileSync(path.join(__dirname, '../dist/plugin/main.js'), 'utf8');
+  assert.ok(bundle.includes('var KLAX_EXAMPLES') && bundle.includes('demo.math'));
+  new Function(bundle); // must at least parse
+  const emoji = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2300}-\u{23FF}\u{FE0F}]/u;
+  const skip = new Set(['.git', 'node_modules', 'dist']);
+  (function walk(dir) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (skip.has(e.name)) continue;
+      const f = path.join(dir, e.name);
+      if (e.isDirectory()) walk(f);
+      else if (/\.(js|json|md|math|yml|html|css)$/.test(e.name)) assert.ok(!emoji.test(fs.readFileSync(f, 'utf8')), 'emoji found in ' + f);
+    }
+  })(path.join(__dirname, '..'));
+});
 t('PDF wrapper is well formed', () => {
   const pdf = K.makePdf(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), 100, 50);
   const s = Buffer.from(pdf).toString('latin1'); assert.ok(s.startsWith('%PDF-1.4') && s.trim().endsWith('%%EOF'));

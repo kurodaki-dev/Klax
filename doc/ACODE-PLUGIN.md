@@ -1,42 +1,52 @@
 # Acode plugin
 
-**Plugin id:** `dev.klax.math` — adds the `.math` file type to Acode.
+**Plugin id:** `dev.klax.math`. It adds the `.math` file type to Acode and does everything else too: preview, export, snippets, examples.
 
 ## Features
-* Syntax highlighting (statements, properties such as `setColor`, colours, numbers, functions, comments).
-* Live preview, refreshing about 0.35 s after you stop typing.
-* Error list with line numbers under the preview.
-* Export to PNG, JPEG, WEBP, SVG and PDF, with the same options as the app.
-* Push your code to the Klax app's server.
+* Syntax highlighting for `.math` files.
+* Live preview, refreshed about 0.3 s after you stop typing, with an error list (line numbers).
+* Export to PNG, JPEG, WEBP, SVG and PDF with scale, background and element options.
+* Snippets for every kind of statement, and new files from bundled examples.
 
-## Commands
+## Floating buttons
+Visible only while a `.math` file is the active file.
+
+| Button | Icon | Action |
+|---|---|---|
+| Run | play | opens the live preview |
+| Export | download | opens the preview with the export panel already open |
+| Snippets | code | list of statements to insert at the cursor |
+
+## Commands and shortcuts
 Open the command palette and type **Klax**.
 
 | Command | Shortcut | What it does |
 |---|---|---|
-| Klax: preview graph | `Ctrl-Alt-P` | opens the full-screen live preview |
-| Klax: send to server | `Ctrl-Alt-S` | `PUT`s the current file to the app |
-| Klax: export as PNG | — | exports with the current export options |
-| Klax: export as SVG | — | same, as vector |
-| Klax: new .math file | — | creates a file with an example |
-| Klax: server address | — | change the address of the app's server |
+| Klax: run (preview graph) | `Ctrl-Alt-P` | full-screen live preview |
+| Klax: export image... | `Ctrl-Alt-E` | preview with the export panel open |
+| Klax: save PNG now | `Ctrl-Alt-S` | saves a PNG with the current export options |
+| Klax: save SVG now | - | saves an SVG with the current export options |
+| Klax: copy SVG code | - | copies the SVG source to the clipboard |
+| Klax: insert snippet | `Ctrl-Alt-I` | pick a statement to insert |
+| Klax: new .math file | `Ctrl-Alt-N` | blank graph or one of the examples |
 
-## The preview toolbar
-| Button | Action |
+## The preview
+| Control | Action |
 |---|---|
-| ⬇ PNG / JPEG / WEBP / SVG / PDF | export the graph as shown |
-| 📡 Server | send the code to the Klax app |
-| 🎛 | show the **export options**: Grid, Axes, Numbers, Legend, Title, and background (*from file* / *transparent* / *custom colour*) |
-| ⚙ | set the server address |
-| ⤢ | toggle fit-to-screen / real size |
-| ✕ | close the preview |
+| Close (x) | closes the preview |
+| Fit / real size | toggles between fitting the screen and 1:1 |
+| Copy | copies the SVG code |
+| Export | shows or hides the export panel |
 
-A checkerboard behind the graph stands for transparent areas.
+A checkerboard behind the graph stands for transparent areas. Errors appear in red under the graph as `line N: message`; the rest of the file still draws.
 
-## Talking to the app
-The default server address is `http://127.0.0.1:8080` (the app on the same phone). If the app is on another device, enable **LAN** in the app's settings and enter its address with **⚙**, e.g. `http://192.168.1.20:8080`.
-While the preview is open, each edit is also pushed to the app automatically (silently, errors are ignored).
+## The export panel
+See [Export](EXPORT.md) for every option. Options are kept while the editor stays open and apply to the preview, to **Save image** and to the quick-save commands.
 
-## Limits
-* The plugin is tested with simulated Acode objects; if a feature behaves differently in your Acode version, please open an issue with the Acode version number.
-* Colouring uses Ace's syntax-highlighting engine; if your Acode version does not expose the mode list, the file still works, only without colours.
+## Snippets
+Function, parametric curve, polar curve, piece of a function (`setCut` with ends), horizontal band (`setClipY`), constant, points, circle, line, text, and a file header (`SIZE`, `BG`, `TITLE`, `RANGE`, `GRID`).
+
+## Notes
+* Icons are Google Material icons embedded in the plugin, so it works offline.
+* The plugin is tested against simulated Acode objects. If a feature behaves differently in your Acode version, please report it with the version number.
+* If your Acode version does not expose the editor's mode list, `.math` files work but are not coloured.
