@@ -803,8 +803,101 @@
     return out;
   }
 
+
+  /* ------------------------------------------------------------------ */
+  /* Autocompletion (used by the Acode plugin, testable without Acode)  */
+  /* ------------------------------------------------------------------ */
+  var COLORS = [['#2563eb', 'blue'], ['#dc2626', 'red'], ['#16a34a', 'green'], ['#d97706', 'orange'], ['#9333ea', 'purple'],
+    ['#0891b2', 'cyan'], ['#db2777', 'pink'], ['#65a30d', 'lime'], ['#38bdf8', 'sky'], ['#f472b6', 'rose'], ['#a3e635', 'light green'],
+    ['#111827', 'near black'], ['#ffffff', 'white'], ['#0f172a', 'dark navy'], ['#f8f5ec', 'paper'],
+    ['rgba(37, 99, 235, 0.5)', 'blue 50%'], ['rgba(220, 38, 38, 0.5)', 'red 50%'], ['rgba(0, 0, 0, 0.2)', 'black 20%'], ['transparent', 'no colour']];
+  var STARTS = [
+    ['SIZE', 'SIZE: {${1:1200}px, ${2:800}px};', 'image size'], ['BG', 'BG: ${1:#ffffff};', 'background'],
+    ['TITLE', 'TITLE: "${1:My graph}";', 'title'], ['RANGE', 'RANGE: x(${1:-10}, ${2:10}) y(${3:-6}, ${4:6});', 'visible window'],
+    ['XRANGE', 'XRANGE: ${1:-10}, ${2:10};', 'x window'], ['YRANGE', 'YRANGE: ${1:-6}, ${2:6};', 'y window'],
+    ['GRID', 'GRID: ${1:on};', 'grid lines'], ['AXES', 'AXES: ${1:on};', 'axis lines'], ['TICKS', 'TICKS: ${1:on};', 'axis numbers'],
+    ['LEGEND', 'LEGEND: ${1:on};', 'legend'], ['ASPECT', 'ASPECT: equal;', 'same scale on both axes'],
+    ['GRIDCOLOR', 'GRIDCOLOR: ${1:rgba(0, 0, 0, 0.1)};', 'grid colour'], ['AXISCOLOR', 'AXISCOLOR: ${1:#1f2937};', 'axis colour'],
+    ['TEXTCOLOR', 'TEXTCOLOR: ${1:#374151};', 'text colour'], ['PADDING', 'PADDING: ${1:40};', 'margin in px'],
+    ['function', 'f(x) = ${1:sin(x)}; setColor -> ${2:#2563eb};', 'template'],
+    ['parametric', 'c(t) = (${1:cos(t)}, ${2:sin(t)}); setColor -> ${3:#db2777}; setCut -> 0, 2*pi;', 'template'],
+    ['polar', 'r(t) = ${1:4*cos(3*t)}; setPolar -> on; setColor -> ${2:#16a34a};', 'template'],
+    ['piece', 'g(x) = ${1:x^2}; setCut -> ${2:-2}, ${3:2}; setEnds -> ${4:closed};', 'template: part of a function'],
+    ['band', 'h(x) = ${1:3*sin(x)}; setClipY -> ${2:0}, ${3:2};', 'template: keep a y band'],
+    ['constant', '${1:a} = ${2:2};', 'template'],
+    ['point', 'point(${1:0}, ${2:0}); setColor -> ${3:#111827};', 'shape'], ['line', 'line(${1:-3}, ${2:-1}, ${3:3}, ${4:2}); setColor -> ${5:#d97706};', 'shape'],
+    ['circle', 'circle(${1:0}, ${2:0}, ${3:3}); setColor -> ${4:#0891b2};', 'shape'], ['text', 'text(${1:1}, ${2:1}, "${3:label}");', 'shape']
+  ];
+  var PROPS = [
+    ['setColor', 'setColor -> ${1:#2563eb};', 'stroke colour'], ['setWidth', 'setWidth -> ${1:3};', 'stroke width'],
+    ['setDash', 'setDash -> ${1:dashed};', 'dash pattern'], ['setOpacity', 'setOpacity -> ${1:0.5};', '0 to 1'],
+    ['setLabel', 'setLabel -> "${1:name}";', 'legend text'], ['setFill', 'setFill -> ${1:on};', 'fill under the curve'],
+    ['setCut', 'setCut -> ${1:-3}, ${2:3};', 'keep only x from a to b'], ['setClipY', 'setClipY -> ${1:0}, ${2:2};', 'keep only y from a to b'],
+    ['setEnds', 'setEnds -> ${1:closed};', 'dots at the ends'], ['setPolar', 'setPolar -> on;', 'polar curve'],
+    ['setRadius', 'setRadius -> ${1:5};', 'point radius']
+  ];
+  var ARGS = { atan2: '${1:y}, ${2:x}', pow: '${1:x}, ${2:2}', mod: '${1:x}, ${2:2}', hypot: '${1:x}, ${2:y}', min: '${1:a}, ${2:b}',
+    max: '${1:a}, ${2:b}', clamp: '${1:x}, ${2:0}, ${3:1}', gauss: '${1:x}, ${2:0}, ${3:1}', log: '${1:x}' };
+
+  /**
+   * Suggestions for the text before the cursor on the current line.
+   * @param {string} before  the line up to the cursor
+   * @param {string} [doc]   the whole file (to suggest your own functions and constants)
+   * @returns {{caption:string, snippet?:string, value?:string, meta:string, score:number}[]}
+   */
+  function complete(before, doc) {
+    var seg = String(before || '');
+    seg = seg.slice(seg.lastIndexOf(';') + 1);
+    var out = [], m;
+    function add(caption, snippet, meta, score) { out.push({ caption: caption, snippet: snippet, meta: meta, score: score }); }
+    function val(caption, meta, score) { out.push({ caption: caption, value: caption, meta: meta, score: score }); }
+    function colors(extra) { COLORS.forEach(function (c, i) { val(c[0], c[1], 900 - i); }); (extra || []).forEach(function (e, i) { val(e, 'option', 990 - i); }); }
+
+    // value positions
+    if (/(?:^|\s)(?:set)?(?:color|colour)\s*(?:->|=>|:)[^;]*$/i.test(seg) || /^\s*(?:BG|BACKGROUND|GRIDCOLOR|AXISCOLOR|TEXTCOLOR)\s*[:=][^;]*$/i.test(seg)) { colors(); return out; }
+    if (/(?:set)?fill\s*(?:->|=>|:)[^;]*$/i.test(seg)) { colors(['on', 'off']); return out; }
+    if (/(?:set)?ends\s*(?:->|=>|:)[^;]*$/i.test(seg)) { ['closed', 'open', 'none'].forEach(function (v, i) { val(v, 'ends', 1000 - i); }); return out; }
+    if (/(?:set)?(?:dash|dashed|style)\s*(?:->|=>|:)[^;]*$/i.test(seg)) {
+      [['dashed', 'dashes'], ['dotted', 'dots'], ['solid', 'no dashes'], ['6,4', 'long dashes'], ['2,6', 'dots']].forEach(function (v, i) { val(v[0], v[1], 1000 - i); }); return out;
+    }
+    if (/(?:set)?polar\s*(?:->|=>|:)[^;]*$/i.test(seg) || /^\s*(?:GRID|AXES|AXIS|TICKS|LABELS|LEGEND)\s*[:=][^;]*$/i.test(seg)) { val('on', 'switch', 1000); val('off', 'switch', 999); return out; }
+    if (/^\s*ASPECT\s*[:=][^;]*$/i.test(seg)) { val('equal', 'same scale', 1000); return out; }
+    if (/->|=>/.test(seg)) return out; // other property values are free numbers or text
+
+    var names = userNames(doc || '');
+    var atStart = /^\s*[A-Za-z_]*$/.test(seg);
+    var inExpr = /=/.test(seg) || /\(/.test(seg);
+    if (atStart) {
+      STARTS.forEach(function (k, i) { add(k[0], k[1], k[2], 800 - i); });
+      PROPS.forEach(function (k, i) { add(k[0], k[1], k[2], 700 - i); });
+    }
+    if (inExpr || atStart) {
+      names.fns.forEach(function (f) { add(f.name, f.name + '(' + f.params.map(function (p, i) { return '${' + (i + 1) + ':' + p + '}'; }).join(', ') + ')', 'your function', 650); });
+      names.consts.forEach(function (c) { add(c, c, 'your constant', 640); });
+    }
+    if (inExpr) {
+      FUNCS_LIST().forEach(function (f, i) { add(f, f + '(' + (ARGS[f] || '${1:x}') + ')', 'function', 600 - i * 0.1); });
+      ['pi', 'tau', 'e', 'phi', 'inf'].forEach(function (c, i) { add(c, c, 'constant', 590 - i); });
+      add('x', 'x', 'variable', 580); add('t', 't', 'variable', 579);
+    }
+    return out;
+  }
+  function FUNCS_LIST() { return Object.keys(FUNCS).sort(); }
+  function userNames(doc) {
+    var fns = [], consts = [], seen = {}, m, re = /^[ \t]*([A-Za-z_π][A-Za-z0-9_π]*)\s*(?:\(\s*([^)]*?)\s*\))?\s*=(?!=)/gm;
+    while ((m = re.exec(doc))) {
+      var n = m[1];
+      if (seen[n] || CONFIG_KEYS.indexOf(n.toLowerCase()) >= 0) continue;
+      seen[n] = true;
+      if (m[2] !== undefined && m[2] !== '') fns.push({ name: n, params: m[2].split(',').map(function (x) { return x.trim(); }) });
+      else if (m[2] === undefined && n !== 'y') consts.push(n);
+      else if (m[2] === undefined) { /* y = ... */ }
+    }
+    return { fns: fns, consts: consts };
+  }
+
   return {
-    version: VERSION, EXAMPLE: EXAMPLE, parse: parse, render: render, parseColor: parseColor,
+    version: VERSION, complete: complete, EXAMPLE: EXAMPLE, parse: parse, render: render, parseColor: parseColor,
     toRaster: toRaster, makePdf: makePdf, MAX_SIDE: MAX_SIDE,
     FUNCTIONS: Object.keys(FUNCS), CONSTANTS: Object.keys(CONSTS)
   };

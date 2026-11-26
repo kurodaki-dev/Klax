@@ -32,5 +32,14 @@ Lower the **Scale** or the `SIZE`. Browsers refuse canvases above about 16 000 p
 ## Nothing seems saved
 Look in the `Download` folder; a message shows the exact file name. If Acode cannot write there, the image is offered as a normal browser download instead.
 
+## No suggestions while typing
+Check **Klax settings, Autocomplete suggestions** is on, and that the active file's name ends in `.math`. Suggestions start after you type one letter or digit; after `->` or `:` type the first character of the value.
+
+## A shortcut does not work
+Open the settings (`Ctrl-Alt-K`, or the gear in the preview) to see the current shortcut of each command. Another Acode shortcut may use the same keys: choose a different combination. If you changed a shortcut and forgot it, **Reset all shortcuts** restores the defaults.
+
+## The `.math` logo does not show in the file list
+It depends on how your Acode version picks file icons. The logo always shows in the preview toolbar. Please report your Acode version if the file list still shows the default icon.
+
 ## `.math` files are not coloured
 Your Acode version may not expose the editor's mode list. The plugin still works; only the colours are missing.

@@ -3,9 +3,10 @@
 ```
 core/klax.js      parser + renderer + exports (no dependencies)
 examples/*.math   sample files
-plugin/main.src.js  Acode integration (UI, commands, saving)
+plugin/keys.js    keyboard-shortcut helpers (pure functions)
+plugin/main.src.js  Acode integration (UI, commands, saving, settings, autocomplete, icon)
         |
-        v   scripts/build-plugin.js  concatenates: core + examples + plugin
+        v   scripts/build-plugin.js  concatenates: core + examples + keys + plugin
 dist/plugin/main.js  ->  klax-math-plugin.zip
 ```
 
@@ -19,6 +20,7 @@ Runs in browsers, Acode and Node (UMD). Public API:
 | `Klax.parseColor(str)` | hex, `rgba()`, `hsl()` or name to `{color, opacity}` |
 | `Klax.toRaster(result, mime, opts)` | browser only: SVG to PNG/JPEG/WEBP `Blob` through a canvas |
 | `Klax.makePdf(jpegBytes, w, h)` | one-page PDF |
+| `Klax.complete(lineBeforeCursor, doc?)` | autocomplete suggestions (values, statements, expressions, your own names) |
 
 ### How a file is processed
 1. **Comments stripped** (`//`, `/* */`). `SIZE://(...)` is special-cased so its `//` is not taken for a comment.
@@ -36,5 +38,11 @@ Runs in browsers, Acode and Node (UMD). Public API:
 * Saves through Acode's `fsOperation` into `Download`, falling back to a browser download.
 * Icons are inline SVG paths from Google Material icons (Apache License 2.0).
 
+### Settings, shortcuts, autocomplete, icon
+* Settings live in `localStorage` under `klax.settings` (`fab`, `complete`, `keys`). `keys` only holds the shortcuts you changed; an empty string means "no shortcut".
+* `applyShortcuts()` removes and re-adds every command with its effective shortcut (`KlaxKeys.effective`).
+* The autocompleter is an Ace completer added to `ace/ext/language_tools`; it calls `Klax.complete` and replaces the whole word before the cursor, so colours starting with `#` insert correctly.
+* The `.math` icon is a CSS rule for the `file_type_math` class plus a wrapper around Acode's `getIconForFile` helper when it is exposed.
+
 ## Tests (`scripts/test.js`)
-No dependencies. Covers `SIZE` spellings, colours, the expression engine, error line numbers, discontinuities, `setCut`, `setClipY`, export overrides, polar and parametric curves, every bundled example, every ```` ```math ```` recipe in `doc/`, the PDF structure, that the plugin bundle builds and parses, and that no emoji appears in the repository.
+No dependencies. Covers `SIZE` spellings, colours, the expression engine, error line numbers, discontinuities, `setCut`, `setClipY`, export overrides, polar and parametric curves, every bundled example, every ```` ```math ```` recipe in `doc/`, autocomplete, shortcut helpers, the plugin manifest, the PDF structure, that the plugin bundle builds and parses, and that no emoji appears in the repository.

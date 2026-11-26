@@ -17,12 +17,33 @@
     code: 'M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z',
     error: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z',
     image: 'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z',
+    settings: 'M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z',
+    keyboard: 'M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z',
     refresh: 'M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z'
   };
   function icon(name, size) {
     var s = size || 22;
     return '<svg class="ki" viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true"><path d="' + ICONS[name] + '"/></svg>';
   }
+
+  /* Klax logo: used for .math files and in the preview toolbar */
+  var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0f172a"/>' +
+    '<path d="M10 32h44M32 10v44" stroke="#64748b" stroke-width="1.6" fill="none"/>' +
+    '<path d="M10 32C16 8 24 8 32 32S48 56 54 32" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round" fill="none"/>' +
+    '<path d="M10 42C22 22 38 22 54 26" stroke="#f472b6" stroke-width="3" stroke-linecap="round" fill="none"/></svg>';
+  var LOGO_URI = 'data:image/svg+xml;utf8,' + encodeURIComponent(LOGO_SVG);
+
+  /* ---------------- Settings (kept in localStorage) ---------------- */
+  var SETTINGS_KEY = 'klax.settings';
+  var settings = null;
+  function getSettings() {
+    if (settings) return settings;
+    var raw = {};
+    try { raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch (e) { raw = {}; }
+    settings = { fab: raw.fab !== false, complete: raw.complete !== false, keys: KlaxKeys.sanitize(raw.keys, commands) };
+    return settings;
+  }
+  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) { /* ignore */ } }
 
   var overlay = null, current = null, liveTimer = null, changeListener = null, bound = null, fab = null, fabTimer = null, modal = null;
   var opts = { format: 'png', scale: 1, quality: 0.92, filename: '', grid: true, axes: true, ticks: true, legend: true, title: true, bg: 'file', color: '#ffffff', alpha: 1 };
@@ -244,7 +265,21 @@
     '#klax-modal .km-head{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 6px 16px;font-weight:600}',
     '#klax-modal .km-row{display:flex;flex-direction:column;align-items:flex-start;width:100%;background:transparent;border:0;color:inherit;text-align:left;padding:10px 16px;font:inherit}',
     '#klax-modal .km-row:active{background:#ffffff18}',
-    '#klax-modal .km-row small{color:#94a3b8}'
+    '#klax-modal .km-row small{color:#94a3b8}',
+    '#klax-modal .km-sec{padding:14px 16px 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8}',
+    '#klax-modal .km-sw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}',
+    '#klax-modal .km-sw input{width:22px;height:22px}',
+    '#klax-modal .km-mods{display:flex;gap:8px;padding:6px 16px}',
+    '#klax-modal .km-input{display:block;width:calc(100% - 32px);margin:6px 16px;background:#0d1426;color:#e5e7eb;border:1px solid #374151;border-radius:8px;padding:10px;font:inherit}',
+    '#klax-modal .km-msg{margin:4px 16px 10px;padding:8px 10px;border-radius:8px;background:#1e293b;color:#cbd5e1;font-size:13px}',
+    '#klax-modal .km-msg.bad{background:#3b1519;color:#fecaca}',
+    '#klax-modal .km-actions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px}',
+    '#klax-modal .km-reset{margin:12px 16px 4px}',
+    '#klax-modal .km-capture{margin:4px 16px}',
+    '#klax-modal .ki-btn{color:#e5e7eb}#klax-modal .ki-btn.fill{background:#2563eb;color:#fff}#klax-modal .ki-btn.tonal{background:#1e293b}',
+    '#klax-modal .kchip{display:inline-flex;align-items:center;height:36px;padding:0 16px;border-radius:18px;border:1px solid #374151;background:transparent;color:#94a3b8;font:inherit}',
+    '#klax-modal .kchip.on{background:#1d3a8a;border-color:#2563eb;color:#fff}',
+    '.ki-logo{width:22px;height:22px;border-radius:5px;margin:0 8px 0 4px;flex:0 0 auto}'
   ].join('');
 
   function buildOverlay() {
@@ -253,11 +288,13 @@
 
     var bar = $('div', { 'class': 'kb' });
     var close = $('button', { 'class': 'ki-btn', 'aria-label': 'Close preview' }, icon('close')); close.onclick = hidePreview;
+    var logo = $('img', { 'class': 'ki-logo', alt: '', src: LOGO_URI });
     var title = $('span', { 'class': 'kt' }, 'Klax');
     var fit = $('button', { 'class': 'ki-btn', 'aria-label': 'Fit or real size' }, icon('open_in_full')); fit.onclick = function () { view.classList.toggle('full'); };
     var copy = $('button', { 'class': 'ki-btn', 'aria-label': 'Copy SVG code' }, icon('content_copy')); copy.onclick = copySvg;
+    var cog = $('button', { 'class': 'ki-btn', 'aria-label': 'Settings and shortcuts' }, icon('settings')); cog.onclick = openSettings;
     var exp = $('button', { 'class': 'ki-btn tonal', 'aria-label': 'Export' }, icon('tune') + '<span>Export</span>'); exp.onclick = toggleSheet;
-    [close, title, fit, copy, exp].forEach(function (b) { bar.appendChild(b); });
+    [close, logo, title, fit, copy, cog, exp].forEach(function (b) { bar.appendChild(b); });
 
     var view = $('div', { 'class': 'kv' });
     var err = $('div', { 'class': 'ke' });
@@ -369,6 +406,181 @@
     bound = null; changeListener = null;
   }
 
+  /* ---------------- Autocomplete suggestions ---------------- */
+  var completer = null, savedEditorOpts = null;
+  function registerCompleter() {
+    try {
+      var tools = ace.require('ace/ext/language_tools');
+      completer = {
+        id: 'klax',
+        getCompletions: function (editor, session, pos, prefix, callback) {
+          if (!getSettings().complete || !isMath()) return callback(null, []);
+          var line = session.getLine(pos.row).slice(0, pos.column);
+          callback(null, Klax.complete(line, session.getValue()).map(function (it) {
+            return { caption: it.caption, value: it.value, snippet: it.snippet, meta: it.meta, score: it.score, completer: completer };
+          }));
+        },
+        // replace the whole word before the cursor (colours start with '#', which Ace does not count as a word character)
+        insertMatch: function (editor, data) {
+          var pos = editor.getCursorPosition(), line = editor.session.getLine(pos.row).slice(0, pos.column);
+          var tok = /[#A-Za-z0-9_.]*$/.exec(line)[0];
+          editor.session.remove({ start: { row: pos.row, column: pos.column - tok.length }, end: pos });
+          if (data.snippet) ace.require('ace/snippets').snippetManager.insertSnippet(editor, data.snippet);
+          else editor.insert(data.value || data.caption);
+        }
+      };
+      tools.addCompleter(completer);
+    } catch (e) { completer = null; console.warn('[Klax] autocomplete not available:', e); }
+  }
+  function unregisterCompleter() {
+    try {
+      var tools = ace.require('ace/ext/language_tools'), i = tools.completers ? tools.completers.indexOf(completer) : -1;
+      if (i >= 0) tools.completers.splice(i, 1);
+    } catch (e) { /* ignore */ }
+    completer = null;
+  }
+  /** Turns on Ace's live suggestions while a .math file is open, and puts the user's own choice back afterwards. */
+  function syncEditorOptions(onMath) {
+    try {
+      var ed = editorManager.editor, want = onMath && getSettings().complete && completer;
+      if (want && !savedEditorOpts) {
+        savedEditorOpts = { basic: ed.getOption('enableBasicAutocompletion'), live: ed.getOption('enableLiveAutocompletion'), snip: ed.getOption('enableSnippets') };
+        ed.setOptions({ enableBasicAutocompletion: true, enableLiveAutocompletion: true, enableSnippets: true });
+      } else if (!want && savedEditorOpts) {
+        ed.setOptions({ enableBasicAutocompletion: savedEditorOpts.basic, enableLiveAutocompletion: savedEditorOpts.live, enableSnippets: savedEditorOpts.snip });
+        savedEditorOpts = null;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------------- File icon for .math ---------------- */
+  var iconStyle = null, origIconFn = null, helpersRef = null;
+  function installFileIcon() {
+    iconStyle = $('style', { id: 'klax-fileicon' },
+      '.file_type_math,.icon.file_type_math,.file.file_type_math{background-image:url("' + LOGO_URI + '")!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;color:transparent!important}');
+    document.head.appendChild(iconStyle);
+    try { // make Acode pick the "math" icon class for .math files
+      helpersRef = acode.require('helpers');
+      if (helpersRef && typeof helpersRef.getIconForFile === 'function' && !helpersRef.getIconForFile._klax) {
+        origIconFn = helpersRef.getIconForFile;
+        var wrapped = function (name) { return /\.math$/i.test(String(name || '')) ? 'file file_type_math' : origIconFn.apply(this, arguments); };
+        wrapped._klax = true; helpersRef.getIconForFile = wrapped;
+      }
+    } catch (e) { /* the CSS alone still applies where Acode already uses that class */ }
+  }
+  function uninstallFileIcon() {
+    if (iconStyle) { iconStyle.remove(); iconStyle = null; }
+    try { if (helpersRef && origIconFn) helpersRef.getIconForFile = origIconFn; } catch (e) { /* ignore */ }
+  }
+
+  /* ---------------- Settings and keyboard shortcuts ---------------- */
+  function cmdLabel(c) { return c.description.replace(/^Klax:\s*/, '').replace(/^./, function (m) { return m.toUpperCase(); }); }
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+  function openSettings() {
+    closeModal();
+    modal = $('div', { id: 'klax-modal' });
+    var card = $('div', { 'class': 'km-card' });
+    modal.appendChild(card);
+    modal.onclick = function (e) { if (e.target === modal) closeModal(); };
+    document.body.appendChild(modal);
+    renderSettings(card);
+  }
+
+  function modalHead(card, title, onBack) {
+    var head = $('div', { 'class': 'km-head' }, '<span>' + title + '</span>');
+    var x = $('button', { 'class': 'ki-btn', 'aria-label': onBack ? 'Back' : 'Close' }, icon('close'));
+    x.onclick = onBack || closeModal; head.appendChild(x); card.appendChild(head);
+  }
+
+  function renderSettings(card) {
+    card.innerHTML = '';
+    var st = getSettings(), map = KlaxKeys.effective(commands, st.keys);
+    modalHead(card, 'Klax settings');
+
+    card.appendChild($('div', { 'class': 'km-sec' }, 'General'));
+    [['Floating buttons on .math files', 'fab'], ['Autocomplete suggestions in .math files', 'complete']].forEach(function (o) {
+      var row = $('label', { 'class': 'km-sw' }), c = $('input', { type: 'checkbox' });
+      c.checked = st[o[1]]; c.onchange = function () { st[o[1]] = c.checked; saveSettings(); tick(); };
+      row.appendChild($('span', {}, o[0])); row.appendChild(c); card.appendChild(row);
+    });
+
+    card.appendChild($('div', { 'class': 'km-sec' }, 'Keyboard shortcuts'));
+    commands.forEach(function (c) {
+      var row = $('button', { 'class': 'km-row' },
+        '<b>' + esc(cmdLabel(c)) + '</b><small>' + (map[c.name] ? esc(map[c.name]) : 'no shortcut') +
+        (st.keys.hasOwnProperty(c.name) ? ' (custom)' : '') + '</small>');
+      row.onclick = function () { renderShortcutEditor(card, c); };
+      card.appendChild(row);
+    });
+    var reset = $('button', { 'class': 'ki-btn tonal km-reset' }, '<span>Reset all shortcuts</span>');
+    reset.onclick = function () { st.keys = {}; saveSettings(); applyShortcuts(); renderSettings(card); toast('Shortcuts reset'); };
+    card.appendChild(reset);
+  }
+
+  function renderShortcutEditor(card, cmd) {
+    card.innerHTML = '';
+    var st = getSettings(), map = KlaxKeys.effective(commands, st.keys), cur = KlaxKeys.parse(map[cmd.name]);
+    var stopCapture = function () { document.removeEventListener('keydown', onKey, true); capBtn.classList.remove('fill'); };
+    var back = function () { stopCapture(); renderSettings(card); };
+    modalHead(card, esc(cmdLabel(cmd)), back);
+
+    var mods = $('div', { 'class': 'km-mods' }), chips = {};
+    [['ctrl', 'Ctrl'], ['alt', 'Alt'], ['shift', 'Shift']].forEach(function (m) {
+      var b = $('button', { 'class': 'kchip' + (cur[m[0]] ? ' on' : '') }, m[1]);
+      b.onclick = function () { cur[m[0]] = !cur[m[0]]; b.classList.toggle('on', cur[m[0]]); preview(); };
+      chips[m[0]] = b; mods.appendChild(b);
+    });
+    card.appendChild(mods);
+    var keyIn = $('input', { type: 'text', maxlength: '10', placeholder: 'Key: a letter, F5, Enter...', 'class': 'km-input' });
+    keyIn.value = cur.key; keyIn.oninput = function () { cur.key = keyIn.value; preview(); };
+    card.appendChild(keyIn);
+    var msg = $('div', { 'class': 'km-msg' }); card.appendChild(msg);
+
+    function result() { return KlaxKeys.build(cur, cur.key); }
+    function preview() {
+      var r = result();
+      if (!r.ok) { msg.className = 'km-msg bad'; msg.textContent = r.error; return; }
+      var other = KlaxKeys.conflict(map, cmd.name, r.shortcut);
+      msg.className = 'km-msg' + (other ? ' bad' : '');
+      msg.textContent = other ? r.shortcut + ' is already used by "' + cmdLabel(commands.filter(function (c) { return c.name === other; })[0]) + '".' : 'New shortcut: ' + r.shortcut;
+    }
+
+    // capture from a hardware keyboard
+    var capBtn = $('button', { 'class': 'ki-btn tonal km-capture' }, icon('keyboard') + '<span>Capture from keyboard</span>');
+    function onKey(e) {
+      if (['Control', 'Alt', 'Shift', 'Meta'].indexOf(e.key) >= 0) return;
+      e.preventDefault(); e.stopPropagation();
+      var k = e.key, code = /^Key([A-Z])$/.exec(e.code || '') || /^Digit(\d)$/.exec(e.code || '');
+      if (code) k = code[1];
+      cur.ctrl = e.ctrlKey || e.metaKey; cur.alt = e.altKey; cur.shift = e.shiftKey; cur.key = KlaxKeys.normalizeKey(k) || '';
+      keyIn.value = cur.key;
+      ['ctrl', 'alt', 'shift'].forEach(function (m) { chips[m].classList.toggle('on', cur[m]); });
+      stopCapture(); preview();
+    }
+    capBtn.onclick = function () {
+      document.addEventListener('keydown', onKey, true); capBtn.classList.add('fill');
+      msg.className = 'km-msg'; msg.textContent = 'Press the shortcut you want...';
+    };
+    card.appendChild(capBtn);
+
+    var row = $('div', { 'class': 'km-actions' });
+    var save = $('button', { 'class': 'ki-btn fill' }, '<span>Save</span>');
+    save.onclick = function () {
+      var r = result();
+      if (!r.ok) return preview();
+      if (KlaxKeys.conflict(map, cmd.name, r.shortcut)) return preview();
+      st.keys[cmd.name] = r.shortcut; saveSettings(); applyShortcuts(); toast(cmdLabel(cmd) + ': ' + r.shortcut); back();
+    };
+    var none = $('button', { 'class': 'ki-btn tonal' }, '<span>No shortcut</span>');
+    none.onclick = function () { st.keys[cmd.name] = ''; saveSettings(); applyShortcuts(); back(); };
+    var dflt = $('button', { 'class': 'ki-btn tonal' }, '<span>Default' + (cmd.key ? ' (' + cmd.key + ')' : '') + '</span>');
+    dflt.onclick = function () { delete st.keys[cmd.name]; saveSettings(); applyShortcuts(); back(); };
+    [save, none, dflt].forEach(function (b) { row.appendChild(b); });
+    card.appendChild(row);
+    preview();
+  }
+
   /* ---------------- Floating action buttons ---------------- */
   function buildFab() {
     if (!document.getElementById('klax-style')) document.head.appendChild($('style', { id: 'klax-style' }, CSS));
@@ -379,10 +591,13 @@
     [snip, exp, run].forEach(function (b) { fab.appendChild(b); });
     document.body.appendChild(fab);
     // Show the buttons only while a .math file is open
-    fabTimer = setInterval(function () {
-      var visible = isMath() && (!overlay || overlay.style.display === 'none');
-      fab.style.display = visible ? 'flex' : 'none';
-    }, 500);
+    fabTimer = setInterval(tick, 500);
+    tick();
+  }
+  function tick() {
+    var onMath = isMath();
+    if (fab) fab.style.display = (onMath && getSettings().fab && (!overlay || overlay.style.display === 'none')) ? 'flex' : 'none';
+    syncEditorOptions(onMath);
   }
 
   /* ---------------- Lifecycle ---------------- */
@@ -390,20 +605,31 @@
     { name: 'klax-run', description: 'Klax: run (preview graph)', key: 'Ctrl-Alt-P', exec: function () { showPreview(false); } },
     { name: 'klax-export', description: 'Klax: export image...', key: 'Ctrl-Alt-E', exec: function () { showPreview(true); } },
     { name: 'klax-save-png', description: 'Klax: save PNG now', key: 'Ctrl-Alt-S', exec: function () { exportImage('png'); } },
-    { name: 'klax-save-svg', description: 'Klax: save SVG now', exec: function () { exportImage('svg'); } },
-    { name: 'klax-copy-svg', description: 'Klax: copy SVG code', exec: copySvg },
+    { name: 'klax-save-svg', description: 'Klax: save SVG now', key: '', exec: function () { exportImage('svg'); } },
+    { name: 'klax-copy-svg', description: 'Klax: copy SVG code', key: '', exec: copySvg },
     { name: 'klax-snippet', description: 'Klax: insert snippet', key: 'Ctrl-Alt-I', exec: insertSnippet },
-    { name: 'klax-new', description: 'Klax: new .math file', key: 'Ctrl-Alt-N', exec: newFromExample }
+    { name: 'klax-new', description: 'Klax: new .math file', key: 'Ctrl-Alt-N', exec: newFromExample },
+    { name: 'klax-settings', description: 'Klax: settings and shortcuts', key: 'Ctrl-Alt-K', exec: openSettings }
   ];
+
+  /** (Re)registers every command with the shortcut currently chosen in the settings. */
+  function applyShortcuts() {
+    var map = KlaxKeys.effective(commands, getSettings().keys);
+    commands.forEach(function (c) {
+      try { editorManager.editor.commands.removeCommand(c.name); } catch (e) { /* not registered yet */ }
+      var key = map[c.name];
+      editorManager.editor.commands.addCommand({
+        name: c.name, description: c.description,
+        bindKey: key ? { win: key, mac: key.replace('Ctrl', 'Cmd') } : undefined, exec: c.exec
+      });
+    });
+  }
 
   acode.setPluginInit(PLUGIN_ID, function () {
     registerMode();
-    commands.forEach(function (c) {
-      editorManager.editor.commands.addCommand({
-        name: c.name, description: c.description,
-        bindKey: c.key ? { win: c.key, mac: c.key.replace('Ctrl', 'Cmd') } : undefined, exec: c.exec
-      });
-    });
+    applyShortcuts();
+    registerCompleter();
+    installFileIcon();
     try {
       var modelist = ace.require('ace/ext/modelist'), orig = modelist.getModeForPath;
       if (orig && !orig._klax) {
@@ -418,6 +644,7 @@
   acode.setPluginUnmount(PLUGIN_ID, function () {
     hidePreview(); closeModal();
     clearInterval(fabTimer);
+    syncEditorOptions(false); unregisterCompleter(); uninstallFileIcon();
     commands.forEach(function (c) { try { editorManager.editor.commands.removeCommand(c.name); } catch (e) { /* ignore */ } });
     try { var ml = ace.require('ace/ext/modelist'); if (ml._origGetModeForPath) ml.getModeForPath = ml._origGetModeForPath; } catch (e) { /* ignore */ }
     [overlay, fab, document.getElementById('klax-style')].forEach(function (n) { if (n) n.remove(); });
