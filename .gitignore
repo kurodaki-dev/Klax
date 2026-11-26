@@ -1,0 +1,9 @@
+dist/
+build/
+.gradle/
+local.properties
+*.jks
+*.keystore
+.idea/
+*.iml
+node_modules/

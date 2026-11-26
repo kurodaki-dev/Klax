@@ -1,0 +1,100 @@
+name: Build Klax
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to attach files to a release on tags
+
+jobs:
+  core-and-plugin:
+    name: Language tests + Acode plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test the .math language core
+        run: node scripts/test.js
+      - name: Build the Acode plugin zip
+        run: node scripts/build-plugin.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: klax-math-acode-plugin
+          path: dist/klax-math-plugin.zip
+
+  apk:
+    name: Android APK
+    runs-on: ubuntu-latest
+    needs: core-and-plugin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+
+      # A persistent key lets users update the app in place. Add the secrets below in
+      # Settings → Secrets and variables → Actions to use your own key; otherwise a
+      # throw-away key is generated for this run.
+      #   KLAX_KEYSTORE_BASE64, KLAX_KEYSTORE_PASSWORD, KLAX_KEY_ALIAS, KLAX_KEY_PASSWORD
+      - name: Prepare signing key
+        env:
+          KS_B64: ${{ secrets.KLAX_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KLAX_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KLAX_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KLAX_KEY_PASSWORD }}
+        run: |
+          KS="$RUNNER_TEMP/klax.jks"
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$KS"
+            ALIAS="$KEY_ALIAS"; SPASS="$KS_PASS"; KPASS="${KEY_PASS:-$KS_PASS}"
+          else
+            ALIAS=klax; SPASS="klax-$RANDOM$RANDOM"; KPASS="$SPASS"
+            keytool -genkeypair -v -keystore "$KS" -storepass "$SPASS" -keypass "$KPASS" \
+              -alias "$ALIAS" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Klax"
+          fi
+          {
+            echo "KLAX_KEYSTORE=$KS"
+            echo "KLAX_KEYSTORE_PASSWORD=$SPASS"
+            echo "KLAX_KEY_ALIAS=$ALIAS"
+            echo "KLAX_KEY_PASSWORD=$KPASS"
+          } >> "$GITHUB_ENV"
+
+      - name: Build release APK
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Name the APK
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk dist/klax.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: klax-apk
+          path: dist/klax.apk
+
+  release:
+    name: Publish release (tags only)
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    needs: [core-and-plugin, apk]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/klax.apk
+            out/klax-math-plugin.zip
+          generate_release_notes: true

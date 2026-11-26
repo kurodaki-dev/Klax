@@ -1,0 +1,14 @@
+// Keep only the strokes you want: setCut (x pieces), setClipY (y band), setEnds (open/closed ends)
+SIZE: {1000px, 700px};
+BG: #ffffff;
+TITLE: "Cutting functions";
+RANGE: x(-6, 6) y(-4, 6);
+
+// one piece of a parabola, closed ends
+f(x) = x^2 / 4;   setColor -> #2563eb; setCut -> -3, 2; setEnds -> closed; setLabel -> "x²/4 on [-3, 2]";
+// piecewise: two separate pieces, open ends
+g(x) = 1 / x;     setColor -> #dc2626; setCut -> [-5, -0.5] [0.5, 5]; setEnds -> open; setLabel -> "1/x (two pieces)";
+// only the part of sin(x) that lies between y = 0 and y = 1
+h(x) = sin(x)*2;  setColor -> #16a34a; setClipY -> 0, 1.5; setWidth -> 4; setLabel -> "2sin(x) where 0 ≤ y ≤ 1.5";
+// open-ended cut: from x = 1 to +infinity
+k(x) = -x/2 - 1;  setColor -> #9333ea; setCut -> 1, inf; setEnds -> closed; setDash -> 6,4;

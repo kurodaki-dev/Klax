@@ -1,0 +1,8 @@
+SIZE: 1000px, 600px;
+BG: #ffffff;
+TITLE: Trigonometry;
+RANGE: x(-2*pi, 2*pi) y(-1.5, 1.5);
+a = 1;
+s(x) = a*sin(x); setColor -> #2563eb; setLabel -> "sin(x)"; setFill -> rgba(37,99,235,0.15);
+k(x) = cos(x);   setColor -> #dc2626; setLabel -> "cos(x)";
+t(x) = tan(x);   setColor -> hsl(140, 60%, 40%); setLabel -> "tan(x)";
