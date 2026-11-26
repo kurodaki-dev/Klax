@@ -36,6 +36,9 @@ Everything is also in the command palette (type "Klax") and on shortcuts:
 
 Export formats: **PNG, JPEG, WEBP, SVG, PDF**, with or without grid/axes/numbers/legend/title, transparent or custom background.
 
+## Support
+If Klax is useful to you, you can sponsor its author: [github.com/kurodaki-dev](https://github.com/kurodaki-dev).
+
 ## Develop
 ```sh
 node scripts/test.js           # tests (language, docs recipes, plugin bundle)
