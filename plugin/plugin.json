@@ -9,8 +9,9 @@
   "minVersionCode": 290,
   "price": 0,
   "author": {
-    "name": "Klax",
+    "name": "kurodaki-dev",
     "email": "",
     "github": "kurodaki-dev"
-  }
+  },
+  "license": "MIT"
 }
