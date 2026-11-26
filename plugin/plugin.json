@@ -1,0 +1,16 @@
+{
+  "id": "dev.klax.math",
+  "name": "Klax Math",
+  "main": "main.js",
+  "version": "1.0.0",
+  "readme": "readme.md",
+  "icon": "icon.png",
+  "files": [],
+  "minVersionCode": 290,
+  "price": 0,
+  "author": {
+    "name": "Klax",
+    "email": "",
+    "github": "kurodaki-dev"
+  }
+}

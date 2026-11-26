@@ -1,0 +1,51 @@
+:root{--bg:#0b1020;--panel:#111827;--line:#1f2937;--text:#e5e7eb;--muted:#94a3b8;--accent:#2563eb;--danger:#dc2626}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;gap:6px;align-items:center;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto;flex:0 0 auto}
+.brand{display:flex;gap:6px;align-items:center;font-weight:700;font-size:17px;margin-right:4px}
+.grow{flex:1}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;background:#1e293b;color:var(--muted);white-space:nowrap}
+.pill.ok{background:#14532d;color:#bbf7d0}.pill.bad{background:#7f1d1d;color:#fecaca}
+button,select,input,textarea{font:inherit;color:inherit}
+button,select{background:#1f2937;border:1px solid #374151;border-radius:8px;padding:7px 11px;white-space:nowrap}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+button:active{filter:brightness(1.2)}
+.tabs{display:none;background:var(--panel);border-bottom:1px solid var(--line);flex:0 0 auto}
+.tabs button{flex:1;border:0;border-radius:0;background:transparent;padding:10px;color:var(--muted)}
+.tabs button.on{color:#fff;box-shadow:inset 0 -2px #38bdf8}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(300px,1fr) minmax(300px,1.2fr) 340px}
+.pane{min-width:0;min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line);overflow:auto}
+#paneCode{padding:0}
+#editor{flex:1;min-height:200px;width:100%;resize:none;border:0;outline:0;background:#0d1426;color:#dbeafe;padding:12px;font:13.5px/1.55 ui-monospace,Menlo,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.errors{background:#2a1215;color:#fecaca;padding:8px 12px;font:12px/1.5 ui-monospace,monospace;max-height:30%;overflow:auto;white-space:pre-wrap}
+.hint{padding:6px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+code{background:#1e293b;padding:1px 5px;border-radius:5px;font-size:.92em}
+.viewbar{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.muted{color:var(--muted)}.small{font-size:12px}
+.view{flex:1;overflow:auto;padding:12px;background:repeating-conic-gradient(#1a2238 0 25%,#121a30 0 50%) 0 0/22px 22px}
+.view svg{display:block;margin:0 auto;box-shadow:0 6px 28px #0009}
+.view.fit svg{max-width:100%;height:auto}
+#paneExport{padding:12px 14px;border-right:0}
+#paneExport h3,#paneExport h4{margin:6px 0 8px}#paneExport h4{margin-top:16px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.grid2{display:grid;gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+label.row{flex-direction:row;align-items:center;gap:8px;color:var(--text)}
+input[type=text],input:not([type]),input[type=number],select{width:100%;background:#0d1426;border:1px solid #374151;border-radius:8px;padding:8px}
+input[type=color]{width:100%;height:40px;border:1px solid #374151;border-radius:8px;background:#0d1426;padding:2px}
+input[type=range]{width:100%}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.checks label{flex-direction:row;align-items:center;gap:8px;color:var(--text);background:#0d1426;border:1px solid #1f2937;border-radius:8px;padding:8px 10px}
+.swatches{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.swatches i{width:28px;height:28px;border-radius:8px;border:1px solid #475569;cursor:pointer}
+.note{margin-top:8px;padding:8px 10px;border-radius:8px;background:#1e293b;color:#cbd5e1;font-size:12.5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+#exportMsg{margin-top:10px;min-height:1.4em;font-size:13px}
+dialog{background:var(--panel);color:var(--text);border:1px solid #374151;border-radius:14px;max-width:min(92vw,460px);width:100%;padding:16px}
+dialog::backdrop{background:#000a}
+dialog h3{margin:0 0 6px}.urls{background:#0d1426;border-radius:8px;padding:8px 10px;margin:8px 0;font:13px ui-monospace,monospace;word-break:break-all}
+@media (max-width:900px){
+  .tabs{display:flex}
+  main{display:block}
+  .pane{display:none;height:100%;border-right:0}
+  .pane.on{display:flex}
+}

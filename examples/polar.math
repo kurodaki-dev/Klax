@@ -1,0 +1,7 @@
+SIZE: {1000px, 1000px};
+BG: #111827;
+ASPECT: equal;
+TITLE: "Polar rose & spiral";
+rose(t) = 5*cos(4*t); setPolar -> on; setColor -> #f43f5e; setWidth -> 3; setLabel -> "r = 5cos(4θ)";
+spi(t) = 0.3*t;       setPolar -> on; setDomain -> 0, 6*pi; setColor -> #22d3ee; setLabel -> "spiral";
+circle(0, 0, 5); setColor -> rgba(255,255,255,0.35); setDash -> dotted;

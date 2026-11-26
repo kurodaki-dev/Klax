@@ -1,0 +1,13 @@
+// Klax — full demo
+SIZE: {1200px, 1300px};
+BG: #0f172a;
+TITLE: "Basic functions";
+RANGE: x(-10, 10) y(-6, 6);
+GRID: on;
+
+f(x) = sin(x) * x / 2; setColor -> #38bdf8; setWidth -> 3; setLabel -> "x·sin(x)/2";
+g(x) = x^2 / 10 - 4;   setColor -> rgba(251, 146, 60, 0.95); setLabel -> "x²/10 − 4";
+h(x) = 1 / x;          setColor -> #a3e635; setDash -> 6,4;
+
+c(t) = (4*cos(t), 4*sin(t)); setColor -> #f472b6; setDomain -> 0, 2*pi;
+point(0, 0, 4, 0, 0, 4); setColor -> #ffffff; setRadius -> 5;
