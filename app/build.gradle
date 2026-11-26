@@ -1,5 +1,8 @@
 plugins { id 'com.android.application' }
 
+// CI passes -PversionCode / -PversionName (run number) so every build can update the previous one.
+def klaxVersionCode = Integer.parseInt((project.findProperty('versionCode') ?: '1').toString())
+def klaxVersionName = (project.findProperty('versionName') ?: '1.0.0').toString()
 def generatedAssets = layout.buildDirectory.dir('generated/klax-assets')
 
 // Single source of truth: the language core and the examples are copied into the app assets.
@@ -16,8 +19,8 @@ android {
         applicationId 'dev.klax.app'
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName '1.0.0'
+        versionCode klaxVersionCode
+        versionName klaxVersionName
     }
     signingConfigs {
         release {
