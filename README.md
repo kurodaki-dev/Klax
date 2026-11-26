@@ -24,7 +24,8 @@ Push to GitHub → **Actions → Build Klax** produces two artifacts:
 * `klax-apk` → `klax.apk` (install on Android; allow "install unknown apps")
 * `klax-math-acode-plugin` → `klax-math-plugin.zip`
 
-Pushing a tag `vX.Y.Z` also attaches both files to a GitHub Release.
+**Every push to `main` automatically publishes a GitHub Release** (`v1.0.<run number>`) with `klax.apk` and `klax-math-plugin.zip` attached,
+and the app's `versionCode` increases with each build. Pushing a tag `vX.Y.Z` publishes a release under that tag instead.
 The APK is signed with a throw-away key unless you add the secrets `KLAX_KEYSTORE_BASE64`, `KLAX_KEYSTORE_PASSWORD`, `KLAX_KEY_ALIAS`, `KLAX_KEY_PASSWORD`
 (a persistent key is needed to update the app in place).
 
