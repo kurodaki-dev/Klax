@@ -98,6 +98,33 @@ t('the plugin bundle builds, contains the examples and no emoji anywhere in the 
     }
   })(path.join(__dirname, '..'));
 });
+t('autocomplete: values, expressions, statements, your own names', () => {
+  const has = (l, c, d) => K.complete(l, d).some(x => x.caption === c);
+  assert.ok(has('setColor -> ', '#2563eb') && has('BG: ', '#ffffff') && has('f(x)=x; setFill -> ', 'on'));
+  assert.ok(has('g(x)=x; setEnds -> ', 'open') && has('h(x)=x; setDash -> ', 'dotted') && has('GRID: ', 'off') && has('ASPECT: ', 'equal'));
+  assert.ok(has('', 'SIZE') && has('', 'function') && has('f(x)=x; setCol', 'setColor') && has('f(x) = si', 'sin') && has('f(x) = ', 'pi'));
+  assert.ok(has('y = wa', 'wave', 'wave(x, a) = x') && has('y = ', 'k', 'k = 2;\ny = x'));
+  assert.ok(!has('setColor -> ', 'sin') && K.complete('setWidth -> ').length === 0, 'value positions only offer values');
+  const f = K.complete('f(x) = ', '').find(x => x.caption === 'atan2'); assert.ok(f && f.snippet.includes('${2:x}'));
+});
+t('keyboard shortcuts: build, parse, conflicts, sanitize', () => {
+  const KK = require('../plugin/keys.js');
+  assert.deepStrictEqual(KK.build({ ctrl: true, alt: true }, 'p'), { ok: true, shortcut: 'Ctrl-Alt-P' });
+  assert.strictEqual(KK.build({}, 'p').ok, false, 'plain letter needs a modifier');
+  assert.strictEqual(KK.build({}, 'f5').shortcut, 'F5');
+  assert.strictEqual(KK.build({ ctrl: true }, 'banana').ok, false);
+  assert.deepStrictEqual(KK.parse('Ctrl-Shift-K'), { ctrl: true, alt: false, shift: true, key: 'K' });
+  const cmds = [{ name: 'a', key: 'Ctrl-Alt-P' }, { name: 'b', key: 'Ctrl-Alt-E' }, { name: 'c' }];
+  const map = KK.effective(cmds, { b: '', c: 'Ctrl-Alt-P' });
+  assert.deepStrictEqual(map, { a: 'Ctrl-Alt-P', b: '', c: 'Ctrl-Alt-P' });
+  assert.strictEqual(KK.conflict(map, 'c', 'ctrl-alt-p'), 'a');
+  assert.deepStrictEqual(KK.sanitize({ a: 'Alt-X', b: '', z: 'Ctrl-K', c: 'P' }, cmds), { a: 'Alt-X', b: '' });
+});
+t('plugin manifest: author, license and repository link', () => {
+  const m = require('../plugin/plugin.json');
+  assert.strictEqual(m.author.name, 'kurodaki-dev'); assert.strictEqual(m.license, 'MIT');
+  assert.strictEqual(m.repository, 'https://github.com/kurodaki-dev/Klax');
+});
 t('PDF wrapper is well formed', () => {
   const pdf = K.makePdf(new Uint8Array([0xff, 0xd8, 0xff, 0xd9]), 100, 50);
   const s = Buffer.from(pdf).toString('latin1'); assert.ok(s.startsWith('%PDF-1.4') && s.trim().endsWith('%%EOF'));
