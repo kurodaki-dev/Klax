@@ -1,9 +1,6 @@
 dist/
-build/
-.gradle/
-local.properties
-*.jks
-*.keystore
+node_modules/
 .idea/
 *.iml
-node_modules/
+*.jks
+*.keystore

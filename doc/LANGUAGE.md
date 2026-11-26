@@ -76,6 +76,6 @@ Styled with the same properties (`setColor`, `setRadius`, `setLabel`, `setFill`,
 | `GRIDCOLOR:` `AXISCOLOR:` `TEXTCOLOR:` | override the automatic light/dark colours |
 | `PADDING: 40;` | margin (px) around the plot area |
 
-## Export options (app and plugin)
-The export panel can override, **without touching the file**: grid, axes, numbers, legend, title and background
+## Export options (plugin)
+The plugin's export panel can override, **without touching the file**: grid, axes, numbers, legend, title and background
 (*as in file* / *transparent* / *custom colour with opacity*). Transparency is kept in PNG, WEBP and SVG; JPEG and PDF are flattened on white.
